@@ -3,6 +3,11 @@ import type { ReferralData } from "@/types";
 export function generateMailtoLink(data: ReferralData): string {
   const subject = encodeURIComponent("Empfehlung – Seehafer Elemente");
 
+  const bankSection =
+    data.noPaypal && data.kontoinhaber
+      ? `\nBankverbindung:\nKontoinhaber: ${data.kontoinhaber}\nIBAN: ${data.iban}\n`
+      : "";
+
   const body = encodeURIComponent(
     `Hey!
 
@@ -16,7 +21,7 @@ Dieser Auftrag wurde
 empfohlen von:
 ${data.name}
 ${data.email}
-Ref: ${data.refCode}
+${bankSection}Ref: ${data.refCode}
 ———————————
 
 Viele Grüße!`

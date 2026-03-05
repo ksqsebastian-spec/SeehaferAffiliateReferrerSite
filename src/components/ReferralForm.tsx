@@ -3,8 +3,8 @@
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { AnimatePresence } from "motion/react";
-import { Mail, FileText, Lock } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
+import { Mail, FileText, Lock, ChevronDown } from "lucide-react";
 import { cva } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 import { referralSchema, type ReferralFormData } from "@/types";
@@ -42,21 +42,43 @@ export default function ReferralForm() {
   const {
     register,
     watch,
-    formState: { errors, isValid },
+    formState: { errors },
   } = useForm<ReferralFormData>({
     resolver: zodResolver(referralSchema),
     mode: "onChange",
-    defaultValues: { name: "", email: "" },
+    defaultValues: {
+      name: "",
+      email: "",
+      noPaypal: false,
+      iban: "",
+      kontoinhaber: "",
+    },
   });
 
   const name = watch("name");
   const email = watch("email");
+  const noPaypal = watch("noPaypal");
+  const iban = watch("iban");
+  const kontoinhaber = watch("kontoinhaber");
 
   useEffect(() => {
     setRefCode(generateRefCode());
   }, []);
 
-  const referralData = { name, email, refCode };
+  const referralData = {
+    name,
+    email,
+    refCode,
+    noPaypal,
+    iban: iban || undefined,
+    kontoinhaber: kontoinhaber || undefined,
+  };
+
+  // Form is ready when there are no errors and required fields are filled
+  const hasNoErrors = Object.keys(errors).length === 0;
+  const baseReady = hasNoErrors && name.length > 0 && email.length > 0;
+  const bankReady = !noPaypal || (!!iban && !!kontoinhaber);
+  const isReady = baseReady && bankReady;
 
   return (
     <section className="fade-in pb-8">
@@ -104,21 +126,106 @@ export default function ReferralForm() {
             )}
           </div>
 
+          {/* No PayPal checkbox */}
+          <div>
+            <label className="flex cursor-pointer items-center gap-2.5">
+              <input
+                type="checkbox"
+                {...register("noPaypal")}
+                className="text-orange focus:ring-orange border-border-subtle h-4 w-4 rounded"
+              />
+              <span className="text-text-main flex items-center gap-1 text-sm">
+                <ChevronDown
+                  size={14}
+                  className={cn(
+                    "text-text-muted transition-transform duration-200",
+                    noPaypal && "rotate-180"
+                  )}
+                />
+                Ich habe kein PayPal
+              </span>
+            </label>
+
+            {/* Bank details (expandable) */}
+            <AnimatePresence>
+              {noPaypal && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.3, ease: "easeOut" }}
+                  className="overflow-hidden"
+                >
+                  <div className="border-border-subtle mt-4 space-y-4 rounded-[var(--radius-sm)] border bg-[#fafaf8] p-4">
+                    <p className="text-text-muted text-[12px]">
+                      Gib deine Bankverbindung an, damit wir dir die Provision
+                      überweisen können.
+                    </p>
+                    <div>
+                      <label htmlFor="kontoinhaber" className={labelClass}>
+                        Kontoinhaber
+                      </label>
+                      <input
+                        id="kontoinhaber"
+                        type="text"
+                        placeholder="Lisa Schmidt"
+                        {...register("kontoinhaber")}
+                        className={cn(
+                          inputClass,
+                          errors.kontoinhaber
+                            ? "border-red-400"
+                            : "border-border-subtle"
+                        )}
+                      />
+                      {errors.kontoinhaber && (
+                        <p className="mt-1 text-xs text-red-500">
+                          {errors.kontoinhaber.message}
+                        </p>
+                      )}
+                    </div>
+                    <div>
+                      <label htmlFor="iban" className={labelClass}>
+                        IBAN
+                      </label>
+                      <input
+                        id="iban"
+                        type="text"
+                        placeholder="DE89 3704 0044 0532 0130 00"
+                        {...register("iban")}
+                        className={cn(
+                          inputClass,
+                          errors.iban
+                            ? "border-red-400"
+                            : "border-border-subtle"
+                        )}
+                      />
+                      {errors.iban && (
+                        <p className="mt-1 text-xs text-red-500">
+                          {errors.iban.message}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
           {/* Template block */}
           <AnimatePresence>
-            {isValid && <TemplateBlock data={referralData} />}
+            {isReady && <TemplateBlock data={referralData} />}
           </AnimatePresence>
 
           {/* Action buttons */}
           <div className="flex flex-col gap-3 min-[400px]:flex-row">
             <a
-              href={isValid ? generateMailtoLink(referralData) : undefined}
+              href={isReady ? generateMailtoLink(referralData) : undefined}
               className={cn(
                 buttonVariants({ variant: "secondary" }),
                 "flex-1",
-                !isValid && "pointer-events-none opacity-50"
+                !isReady && "pointer-events-none opacity-50"
               )}
-              aria-disabled={!isValid}
+              aria-disabled={!isReady}
             >
               <Mail size={16} />
               Per E-Mail senden
@@ -126,7 +233,7 @@ export default function ReferralForm() {
             <button
               type="button"
               onClick={() => generatePDF(referralData)}
-              disabled={!isValid}
+              disabled={!isReady}
               className={cn(buttonVariants({ variant: "primary" }), "flex-1")}
             >
               <FileText size={16} />

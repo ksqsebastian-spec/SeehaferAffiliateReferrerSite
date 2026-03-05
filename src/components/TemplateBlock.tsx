@@ -30,6 +30,15 @@ export default function TemplateBlock({ data }: TemplateBlockProps) {
         <p>empfohlen von:</p>
         <p className="font-semibold">{data.name}</p>
         <p>{data.email}</p>
+        {data.noPaypal && data.kontoinhaber && (
+          <>
+            <p className="text-text-muted mt-2 text-[12px] font-semibold">
+              Bankverbindung:
+            </p>
+            <p>Kontoinhaber: {data.kontoinhaber}</p>
+            <p>IBAN: {data.iban}</p>
+          </>
+        )}
         <p>Ref: {data.refCode}</p>
         <p className="text-text-muted">———————————</p>
       </div>
