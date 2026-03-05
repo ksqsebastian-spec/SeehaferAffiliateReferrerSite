@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { Mail, FileText, Lock, ChevronDown } from "lucide-react";
 import { cva } from "class-variance-authority";
@@ -43,23 +43,6 @@ export default function ReferralForm() {
   const [kontoinhaber, setKontoinhaber] = useState("");
   const [touched, setTouched] = useState<Record<string, boolean>>({});
 
-  const nameRef = useRef<HTMLInputElement>(null);
-  const emailRef = useRef<HTMLInputElement>(null);
-
-  // Detect browser autofill (autofill doesn't fire React onChange)
-  useEffect(() => {
-    let count = 0;
-    const interval = setInterval(() => {
-      count++;
-      const nameVal = nameRef.current?.value ?? "";
-      const emailVal = emailRef.current?.value ?? "";
-      setName((prev) => (nameVal !== prev ? nameVal : prev));
-      setEmail((prev) => (emailVal !== prev ? emailVal : prev));
-      if (count >= 20) clearInterval(interval);
-    }, 300);
-    return () => clearInterval(interval);
-  }, []);
-
   const form: ReferralFormData = { name, email, noPaypal, iban, kontoinhaber };
   const errors = validateForm(form);
   const isReady =
@@ -81,7 +64,6 @@ export default function ReferralForm() {
               Dein Name
             </label>
             <input
-              ref={nameRef}
               id="name"
               type="text"
               placeholder="Lisa Schmidt"
@@ -106,7 +88,6 @@ export default function ReferralForm() {
               Deine E-Mail / PayPal
             </label>
             <input
-              ref={emailRef}
               id="email"
               type="email"
               placeholder="lisa.schmidt@gmail.com"
@@ -243,29 +224,6 @@ export default function ReferralForm() {
               <FileText size={16} />
               Als PDF herunterladen
             </button>
-          </div>
-
-          {/* DEBUG: Remove after fixing */}
-          <div className="rounded border border-yellow-400 bg-yellow-50 p-3 font-mono text-xs text-gray-800">
-            <p>
-              <strong>DEBUG PANEL</strong>
-            </p>
-            <p>
-              name: &quot;{name}&quot; (len={name.length})
-            </p>
-            <p>
-              email: &quot;{email}&quot; (len={email.length})
-            </p>
-            <p>noPaypal: {String(noPaypal)}</p>
-            <p>errors: {JSON.stringify(errors)}</p>
-            <p>errorKeys: {Object.keys(errors).length}</p>
-            <p
-              className={
-                isReady ? "font-bold text-green-700" : "font-bold text-red-700"
-              }
-            >
-              isReady: {String(isReady)}
-            </p>
           </div>
 
           {/* Privacy note */}
