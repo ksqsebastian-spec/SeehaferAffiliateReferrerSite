@@ -1,68 +1,77 @@
+const steps = [
+  {
+    num: 1,
+    title: "Formular ausfullen",
+    desc: "Name und PayPal-Adresse (oder Bankverbindung) eingeben.",
+    highlight: false,
+  },
+  {
+    num: 2,
+    title: "Empfehlungsblock weitergeben",
+    desc: "Per E-Mail, Gmail, Zwischenablage oder PDF — an die Person, die Tischlerarbeiten braucht.",
+    highlight: false,
+  },
+  {
+    num: 3,
+    title: "Auftrag kommt zustande",
+    desc: "Die Person schickt eine Anfrage an Seehafer Elemente und fugt den Empfehlungsblock bei.",
+    highlight: false,
+  },
+  {
+    num: 4,
+    title: "Provision erhalten",
+    desc: "Wenn ein Auftrag daraus entsteht, bekommst du deine Provision auf PayPal oder per Uberweisung.",
+    highlight: true,
+  },
+];
+
 export default function StepCards() {
   return (
     <section className="fade-in pb-10">
-      <div
-        className="rounded-2xl bg-white p-5 sm:p-6"
-        style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}
-      >
-        <p className="text-navy mb-4 text-sm font-bold">So funktioniert es:</p>
-        <ol className="space-y-3">
-          <li className="flex items-start gap-3">
-            <span className="bg-navy flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white">
-              1
+      <p className="text-navy mb-5 text-center text-sm font-bold tracking-wide uppercase">
+        So funktioniert es
+      </p>
+      <div className="relative ml-6 border-l-2 border-gray-200 pl-8 sm:ml-8 sm:pl-10">
+        {steps.map((step, i) => (
+          <div
+            key={step.num}
+            className={`relative pb-8 ${i === steps.length - 1 ? "pb-0" : ""}`}
+          >
+            {/* Circle on the timeline */}
+            <span
+              className={`absolute -left-[calc(2rem+1px)] flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold text-white sm:-left-[calc(2.5rem+1px)] sm:h-12 sm:w-12 sm:text-base ${
+                step.highlight ? "bg-orange ring-4 ring-orange-100" : "bg-navy"
+              }`}
+            >
+              {step.num}
             </span>
-            <div>
-              <p className="text-navy text-sm font-semibold">
-                Formular ausfullen
+
+            {/* Content */}
+            <div
+              className={`rounded-xl p-4 sm:p-5 ${
+                step.highlight
+                  ? "bg-orange-50 ring-1 ring-orange-200"
+                  : "bg-white"
+              }`}
+              style={
+                step.highlight
+                  ? undefined
+                  : { boxShadow: "0 1px 4px rgba(0,0,0,0.05)" }
+              }
+            >
+              <p
+                className={`text-sm font-bold sm:text-base ${
+                  step.highlight ? "text-orange" : "text-navy"
+                }`}
+              >
+                {step.title}
               </p>
-              <p className="text-text-muted text-xs">
-                Name und PayPal-Adresse (oder Bankverbindung) eingeben.
+              <p className="text-text-muted mt-1 text-xs sm:text-sm">
+                {step.desc}
               </p>
             </div>
-          </li>
-          <li className="flex items-start gap-3">
-            <span className="bg-navy flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white">
-              2
-            </span>
-            <div>
-              <p className="text-navy text-sm font-semibold">
-                Empfehlungsblock weitergeben
-              </p>
-              <p className="text-text-muted text-xs">
-                Per E-Mail, Gmail, Zwischenablage oder PDF — an die Person, die
-                Tischlerarbeiten braucht.
-              </p>
-            </div>
-          </li>
-          <li className="flex items-start gap-3">
-            <span className="bg-navy flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white">
-              3
-            </span>
-            <div>
-              <p className="text-navy text-sm font-semibold">
-                Auftrag kommt zustande
-              </p>
-              <p className="text-text-muted text-xs">
-                Die Person schickt eine Anfrage an Seehafer Elemente und fugt
-                den Empfehlungsblock bei.
-              </p>
-            </div>
-          </li>
-          <li className="flex items-start gap-3">
-            <span className="bg-orange flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white">
-              4
-            </span>
-            <div>
-              <p className="text-orange text-sm font-semibold">
-                Provision erhalten
-              </p>
-              <p className="text-text-muted text-xs">
-                Wenn ein Auftrag daraus entsteht, bekommst du deine Provision
-                auf PayPal oder per Uberweisung.
-              </p>
-            </div>
-          </li>
-        </ol>
+          </div>
+        ))}
       </div>
     </section>
   );
