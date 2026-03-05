@@ -5,6 +5,7 @@ const sampleData = {
   name: "Lisa Schmidt",
   email: "lisa@example.com",
   refCode: "#SEE-2026-1234",
+  noPaypal: false,
 };
 
 describe("generateMailtoLink", () => {
@@ -40,9 +41,28 @@ describe("generateMailtoLink", () => {
       name: "Müller-Öß",
       email: "test@test.de",
       refCode: "#SEE-2026-0001",
+      noPaypal: false,
     });
-    // Should not contain raw spaces or special chars outside encoding
     expect(link).not.toContain(" ");
     expect(link).toContain(encodeURIComponent("Müller-Öß"));
+  });
+
+  it("includes bank details when noPaypal is true", () => {
+    const link = generateMailtoLink({
+      name: "Lisa Schmidt",
+      email: "lisa@example.com",
+      refCode: "#SEE-2026-1234",
+      noPaypal: true,
+      kontoinhaber: "Lisa Schmidt",
+      iban: "DE89370400440532013000",
+    });
+    expect(link).toContain(encodeURIComponent("Bankverbindung:"));
+    expect(link).toContain(encodeURIComponent("IBAN: DE89370400440532013000"));
+    expect(link).toContain(encodeURIComponent("Kontoinhaber: Lisa Schmidt"));
+  });
+
+  it("does not include bank details when noPaypal is false", () => {
+    const link = generateMailtoLink(sampleData);
+    expect(link).not.toContain(encodeURIComponent("Bankverbindung:"));
   });
 });

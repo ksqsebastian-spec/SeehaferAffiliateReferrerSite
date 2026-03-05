@@ -44,6 +44,22 @@ export async function generatePDF(data: ReferralData): Promise<void> {
   doc.setFont("helvetica", "normal");
   doc.text(data.email, margin, y);
   y += 6;
+
+  // Bank details if no PayPal
+  if (data.noPaypal && data.kontoinhaber) {
+    y += 4;
+    doc.setFontSize(9);
+    doc.setFont("helvetica", "bold");
+    doc.text("Bankverbindung:", margin, y);
+    y += 5;
+    doc.setFont("helvetica", "normal");
+    doc.text(`Kontoinhaber: ${data.kontoinhaber}`, margin, y);
+    y += 5;
+    doc.text(`IBAN: ${data.iban || ""}`, margin, y);
+    y += 6;
+    doc.setFontSize(10);
+  }
+
   doc.text(`Ref: ${data.refCode}`, margin, y);
   y += 10;
 
