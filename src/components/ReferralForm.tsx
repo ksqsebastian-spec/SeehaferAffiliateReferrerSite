@@ -1,13 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { useState, useCallback } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { Mail, FileText, Lock, ChevronDown } from "lucide-react";
 import { cva } from "class-variance-authority";
 import { cn } from "@/lib/utils";
-import { referralSchema, type ReferralFormData } from "@/types";
+import {
+  validateForm,
+  type ReferralFormData,
+  type ValidationErrors,
+} from "@/types";
 import { generateRefCode } from "@/lib/generateRefCode";
 import { generateMailtoLink } from "@/lib/generateMailtoLink";
 import { generatePDF } from "@/lib/generatePDF";
@@ -37,48 +39,42 @@ const labelClass =
   "mb-1.5 block text-[12px] font-semibold tracking-[1px] text-text-muted uppercase";
 
 export default function ReferralForm() {
-  const [refCode, setRefCode] = useState("");
-
-  const {
-    register,
-    watch,
-    formState: { errors },
-  } = useForm<ReferralFormData>({
-    resolver: zodResolver(referralSchema),
-    mode: "onChange",
-    defaultValues: {
-      name: "",
-      email: "",
-      noPaypal: false,
-      iban: "",
-      kontoinhaber: "",
-    },
+  const [refCode] = useState(() => generateRefCode());
+  const [form, setForm] = useState<ReferralFormData>({
+    name: "",
+    email: "",
+    noPaypal: false,
+    iban: "",
+    kontoinhaber: "",
   });
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
+  const [errors, setErrors] = useState<ValidationErrors>({});
 
-  const name = watch("name");
-  const email = watch("email");
-  const noPaypal = watch("noPaypal");
-  const iban = watch("iban");
-  const kontoinhaber = watch("kontoinhaber");
+  const updateField = useCallback(
+    (field: keyof ReferralFormData, value: string | boolean) => {
+      setForm((prev) => {
+        const next = { ...prev, [field]: value };
+        setErrors(validateForm(next));
+        return next;
+      });
+    },
+    []
+  );
 
-  useEffect(() => {
-    setRefCode(generateRefCode());
-  }, []);
-
-  const referralData = {
-    name,
-    email,
-    refCode,
-    noPaypal,
-    iban: iban || undefined,
-    kontoinhaber: kontoinhaber || undefined,
+  const handleBlur = (field: string) => {
+    setTouched((prev) => ({ ...prev, [field]: true }));
   };
 
-  // Form is ready when there are no errors and required fields are filled
-  const hasNoErrors = Object.keys(errors).length === 0;
-  const baseReady = hasNoErrors && name.length > 0 && email.length > 0;
-  const bankReady = !noPaypal || (!!iban && !!kontoinhaber);
-  const isReady = baseReady && bankReady;
+  const referralData = {
+    ...form,
+    refCode,
+  };
+
+  const validationErrors = validateForm(form);
+  const isReady =
+    Object.keys(validationErrors).length === 0 &&
+    form.name.length > 0 &&
+    form.email.length > 0;
 
   return (
     <section className="fade-in pb-8">
@@ -93,14 +89,18 @@ export default function ReferralForm() {
               id="name"
               type="text"
               placeholder="Lisa Schmidt"
-              {...register("name")}
+              value={form.name}
+              onChange={(e) => updateField("name", e.target.value)}
+              onBlur={() => handleBlur("name")}
               className={cn(
                 inputClass,
-                errors.name ? "border-red-400" : "border-border-subtle"
+                touched.name && errors.name
+                  ? "border-red-400"
+                  : "border-border-subtle"
               )}
             />
-            {errors.name && (
-              <p className="mt-1 text-xs text-red-500">{errors.name.message}</p>
+            {touched.name && errors.name && (
+              <p className="mt-1 text-xs text-red-500">{errors.name}</p>
             )}
           </div>
 
@@ -113,16 +113,18 @@ export default function ReferralForm() {
               id="email"
               type="email"
               placeholder="lisa.schmidt@gmail.com"
-              {...register("email")}
+              value={form.email}
+              onChange={(e) => updateField("email", e.target.value)}
+              onBlur={() => handleBlur("email")}
               className={cn(
                 inputClass,
-                errors.email ? "border-red-400" : "border-border-subtle"
+                touched.email && errors.email
+                  ? "border-red-400"
+                  : "border-border-subtle"
               )}
             />
-            {errors.email && (
-              <p className="mt-1 text-xs text-red-500">
-                {errors.email.message}
-              </p>
+            {touched.email && errors.email && (
+              <p className="mt-1 text-xs text-red-500">{errors.email}</p>
             )}
           </div>
 
@@ -131,7 +133,8 @@ export default function ReferralForm() {
             <label className="flex cursor-pointer items-center gap-2.5">
               <input
                 type="checkbox"
-                {...register("noPaypal")}
+                checked={form.noPaypal}
+                onChange={(e) => updateField("noPaypal", e.target.checked)}
                 className="text-orange focus:ring-orange border-border-subtle h-4 w-4 rounded"
               />
               <span className="text-text-main flex items-center gap-1 text-sm">
@@ -139,7 +142,7 @@ export default function ReferralForm() {
                   size={14}
                   className={cn(
                     "text-text-muted transition-transform duration-200",
-                    noPaypal && "rotate-180"
+                    form.noPaypal && "rotate-180"
                   )}
                 />
                 Ich habe kein PayPal
@@ -148,7 +151,7 @@ export default function ReferralForm() {
 
             {/* Bank details (expandable) */}
             <AnimatePresence>
-              {noPaypal && (
+              {form.noPaypal && (
                 <motion.div
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: "auto" }}
@@ -169,17 +172,21 @@ export default function ReferralForm() {
                         id="kontoinhaber"
                         type="text"
                         placeholder="Lisa Schmidt"
-                        {...register("kontoinhaber")}
+                        value={form.kontoinhaber}
+                        onChange={(e) =>
+                          updateField("kontoinhaber", e.target.value)
+                        }
+                        onBlur={() => handleBlur("kontoinhaber")}
                         className={cn(
                           inputClass,
-                          errors.kontoinhaber
+                          touched.kontoinhaber && errors.kontoinhaber
                             ? "border-red-400"
                             : "border-border-subtle"
                         )}
                       />
-                      {errors.kontoinhaber && (
+                      {touched.kontoinhaber && errors.kontoinhaber && (
                         <p className="mt-1 text-xs text-red-500">
-                          {errors.kontoinhaber.message}
+                          {errors.kontoinhaber}
                         </p>
                       )}
                     </div>
@@ -191,17 +198,19 @@ export default function ReferralForm() {
                         id="iban"
                         type="text"
                         placeholder="DE89 3704 0044 0532 0130 00"
-                        {...register("iban")}
+                        value={form.iban}
+                        onChange={(e) => updateField("iban", e.target.value)}
+                        onBlur={() => handleBlur("iban")}
                         className={cn(
                           inputClass,
-                          errors.iban
+                          touched.iban && errors.iban
                             ? "border-red-400"
                             : "border-border-subtle"
                         )}
                       />
-                      {errors.iban && (
+                      {touched.iban && errors.iban && (
                         <p className="mt-1 text-xs text-red-500">
-                          {errors.iban.message}
+                          {errors.iban}
                         </p>
                       )}
                     </div>
