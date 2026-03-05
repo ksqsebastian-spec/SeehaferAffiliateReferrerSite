@@ -1,15 +1,11 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { Mail, FileText, Lock, ChevronDown } from "lucide-react";
 import { cva } from "class-variance-authority";
 import { cn } from "@/lib/utils";
-import {
-  validateForm,
-  type ReferralFormData,
-  type ValidationErrors,
-} from "@/types";
+import { validateForm, type ReferralFormData } from "@/types";
 import { generateRefCode } from "@/lib/generateRefCode";
 import { generateMailtoLink } from "@/lib/generateMailtoLink";
 import { generatePDF } from "@/lib/generatePDF";
@@ -40,41 +36,23 @@ const labelClass =
 
 export default function ReferralForm() {
   const [refCode] = useState(() => generateRefCode());
-  const [form, setForm] = useState<ReferralFormData>({
-    name: "",
-    email: "",
-    noPaypal: false,
-    iban: "",
-    kontoinhaber: "",
-  });
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [noPaypal, setNoPaypal] = useState(false);
+  const [iban, setIban] = useState("");
+  const [kontoinhaber, setKontoinhaber] = useState("");
   const [touched, setTouched] = useState<Record<string, boolean>>({});
-  const [errors, setErrors] = useState<ValidationErrors>({});
 
-  const updateField = useCallback(
-    (field: keyof ReferralFormData, value: string | boolean) => {
-      setForm((prev) => {
-        const next = { ...prev, [field]: value };
-        setErrors(validateForm(next));
-        return next;
-      });
-    },
-    []
-  );
+  const form: ReferralFormData = { name, email, noPaypal, iban, kontoinhaber };
+  const errors = validateForm(form);
+  const isReady =
+    Object.keys(errors).length === 0 && name.length > 0 && email.length > 0;
+
+  const referralData = { ...form, refCode };
 
   const handleBlur = (field: string) => {
     setTouched((prev) => ({ ...prev, [field]: true }));
   };
-
-  const referralData = {
-    ...form,
-    refCode,
-  };
-
-  const validationErrors = validateForm(form);
-  const isReady =
-    Object.keys(validationErrors).length === 0 &&
-    form.name.length > 0 &&
-    form.email.length > 0;
 
   return (
     <section className="fade-in pb-8">
@@ -89,8 +67,8 @@ export default function ReferralForm() {
               id="name"
               type="text"
               placeholder="Lisa Schmidt"
-              value={form.name}
-              onChange={(e) => updateField("name", e.target.value)}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
               onBlur={() => handleBlur("name")}
               className={cn(
                 inputClass,
@@ -113,8 +91,8 @@ export default function ReferralForm() {
               id="email"
               type="email"
               placeholder="lisa.schmidt@gmail.com"
-              value={form.email}
-              onChange={(e) => updateField("email", e.target.value)}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               onBlur={() => handleBlur("email")}
               className={cn(
                 inputClass,
@@ -133,8 +111,8 @@ export default function ReferralForm() {
             <label className="flex cursor-pointer items-center gap-2.5">
               <input
                 type="checkbox"
-                checked={form.noPaypal}
-                onChange={(e) => updateField("noPaypal", e.target.checked)}
+                checked={noPaypal}
+                onChange={(e) => setNoPaypal(e.target.checked)}
                 className="text-orange focus:ring-orange border-border-subtle h-4 w-4 rounded"
               />
               <span className="text-text-main flex items-center gap-1 text-sm">
@@ -142,7 +120,7 @@ export default function ReferralForm() {
                   size={14}
                   className={cn(
                     "text-text-muted transition-transform duration-200",
-                    form.noPaypal && "rotate-180"
+                    noPaypal && "rotate-180"
                   )}
                 />
                 Ich habe kein PayPal
@@ -151,7 +129,7 @@ export default function ReferralForm() {
 
             {/* Bank details (expandable) */}
             <AnimatePresence>
-              {form.noPaypal && (
+              {noPaypal && (
                 <motion.div
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: "auto" }}
@@ -172,10 +150,8 @@ export default function ReferralForm() {
                         id="kontoinhaber"
                         type="text"
                         placeholder="Lisa Schmidt"
-                        value={form.kontoinhaber}
-                        onChange={(e) =>
-                          updateField("kontoinhaber", e.target.value)
-                        }
+                        value={kontoinhaber}
+                        onChange={(e) => setKontoinhaber(e.target.value)}
                         onBlur={() => handleBlur("kontoinhaber")}
                         className={cn(
                           inputClass,
@@ -198,8 +174,8 @@ export default function ReferralForm() {
                         id="iban"
                         type="text"
                         placeholder="DE89 3704 0044 0532 0130 00"
-                        value={form.iban}
-                        onChange={(e) => updateField("iban", e.target.value)}
+                        value={iban}
+                        onChange={(e) => setIban(e.target.value)}
                         onBlur={() => handleBlur("iban")}
                         className={cn(
                           inputClass,
