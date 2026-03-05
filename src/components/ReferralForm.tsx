@@ -226,6 +226,29 @@ export default function ReferralForm() {
             </button>
           </div>
 
+          {/* DEBUG: Remove after fixing */}
+          <div className="rounded border border-yellow-400 bg-yellow-50 p-3 font-mono text-xs text-gray-800">
+            <p>
+              <strong>DEBUG PANEL</strong>
+            </p>
+            <p>
+              name: &quot;{name}&quot; (len={name.length})
+            </p>
+            <p>
+              email: &quot;{email}&quot; (len={email.length})
+            </p>
+            <p>noPaypal: {String(noPaypal)}</p>
+            <p>errors: {JSON.stringify(errors)}</p>
+            <p>errorKeys: {Object.keys(errors).length}</p>
+            <p
+              className={
+                isReady ? "font-bold text-green-700" : "font-bold text-red-700"
+              }
+            >
+              isReady: {String(isReady)}
+            </p>
+          </div>
+
           {/* Privacy note */}
           <p className="text-text-muted flex items-center gap-1.5 text-[12px]">
             <Lock size={12} className="shrink-0" />
