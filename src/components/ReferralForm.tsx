@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { Mail, FileText, Lock, ChevronDown } from "lucide-react";
 import { cva } from "class-variance-authority";
@@ -43,6 +43,23 @@ export default function ReferralForm() {
   const [kontoinhaber, setKontoinhaber] = useState("");
   const [touched, setTouched] = useState<Record<string, boolean>>({});
 
+  const nameRef = useRef<HTMLInputElement>(null);
+  const emailRef = useRef<HTMLInputElement>(null);
+
+  // Detect browser autofill (autofill doesn't fire React onChange)
+  useEffect(() => {
+    let count = 0;
+    const interval = setInterval(() => {
+      count++;
+      const nameVal = nameRef.current?.value ?? "";
+      const emailVal = emailRef.current?.value ?? "";
+      setName((prev) => (nameVal !== prev ? nameVal : prev));
+      setEmail((prev) => (emailVal !== prev ? emailVal : prev));
+      if (count >= 20) clearInterval(interval);
+    }, 300);
+    return () => clearInterval(interval);
+  }, []);
+
   const form: ReferralFormData = { name, email, noPaypal, iban, kontoinhaber };
   const errors = validateForm(form);
   const isReady =
@@ -64,6 +81,7 @@ export default function ReferralForm() {
               Dein Name
             </label>
             <input
+              ref={nameRef}
               id="name"
               type="text"
               placeholder="Lisa Schmidt"
@@ -88,6 +106,7 @@ export default function ReferralForm() {
               Deine E-Mail / PayPal
             </label>
             <input
+              ref={emailRef}
               id="email"
               type="email"
               placeholder="lisa.schmidt@gmail.com"
