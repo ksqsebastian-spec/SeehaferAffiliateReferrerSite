@@ -1,31 +1,26 @@
 import type { ReferralData } from "@/types";
+import { getReferralBlockText } from "./referralBlock";
+
+function getEmailBody(data: ReferralData): string {
+  return `Hey!
+
+Ich hab Seehafer Elemente empfohlen — die machen richtig gute Tischlerarbeiten.
+
+Falls Interesse besteht, einfach ne Mail an info@seehafer-elemente.de schreiben und den Block hier unten in die Anfrage mit reinpacken. Dann wissen die Bescheid.
+
+${getReferralBlockText(data)}
+
+Viele Gruesse!`;
+}
 
 export function generateMailtoLink(data: ReferralData): string {
   const subject = encodeURIComponent("Empfehlung – Seehafer Elemente");
-
-  const bankSection =
-    data.noPaypal && data.kontoinhaber
-      ? `\nBankverbindung:\nKontoinhaber: ${data.kontoinhaber}\nIBAN: ${data.iban}\n`
-      : "";
-
-  const body = encodeURIComponent(
-    `Hey!
-
-Ich hab dir Seehafer Elemente empfohlen — die machen richtig gute Tischlerarbeiten.
-
-Falls du Interesse hast, schreib denen einfach ne Mail an info@seehafer-elemente.de und häng den Block hier unten in deine Anfrage mit rein. Dann wissen die Bescheid.
-
-———————————
-📌 Empfehlung
-Dieser Auftrag wurde
-empfohlen von:
-${data.name}
-${data.email}
-${bankSection}Ref: ${data.refCode}
-———————————
-
-Viele Grüße!`
-  );
-
+  const body = encodeURIComponent(getEmailBody(data));
   return `mailto:?subject=${subject}&body=${body}`;
+}
+
+export function generateGmailLink(data: ReferralData): string {
+  const subject = encodeURIComponent("Empfehlung – Seehafer Elemente");
+  const body = encodeURIComponent(getEmailBody(data));
+  return `https://mail.google.com/mail/?view=cm&su=${subject}&body=${body}`;
 }

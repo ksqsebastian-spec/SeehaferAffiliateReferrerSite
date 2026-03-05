@@ -1,32 +1,68 @@
-import { ArrowRight } from "lucide-react";
-
-const steps = [
-  { num: 1, title: "Ausfüllen", desc: "Name + PayPal" },
-  { num: 2, title: "Senden", desc: "Per Mail oder PDF" },
-  { num: 3, title: "Verdienen", desc: "Provision bei Auftrag" },
-];
-
 export default function StepCards() {
   return (
-    <section className="fade-in pb-12">
-      <div className="flex flex-col items-center gap-3 sm:flex-row">
-        {steps.map((step, i) => (
-          <div key={step.num} className="flex items-center gap-3">
-            <div className="bg-bg-card shadow-card flex-1 rounded-[var(--radius)] p-4">
-              <div className="bg-navy mb-2 flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold text-white">
-                {step.num}
-              </div>
-              <p className="text-navy text-sm font-bold">{step.title}</p>
-              <p className="text-text-muted text-[12px]">{step.desc}</p>
+    <section className="fade-in pb-10">
+      <div
+        className="rounded-2xl bg-white p-5 sm:p-6"
+        style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}
+      >
+        <p className="text-navy mb-4 text-sm font-bold">So funktioniert es:</p>
+        <ol className="space-y-3">
+          <li className="flex items-start gap-3">
+            <span className="bg-navy flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white">
+              1
+            </span>
+            <div>
+              <p className="text-navy text-sm font-semibold">
+                Formular ausfullen
+              </p>
+              <p className="text-text-muted text-xs">
+                Name und PayPal-Adresse (oder Bankverbindung) eingeben.
+              </p>
             </div>
-            {i < steps.length - 1 && (
-              <ArrowRight
-                className="text-text-muted hidden shrink-0 sm:block"
-                size={18}
-              />
-            )}
-          </div>
-        ))}
+          </li>
+          <li className="flex items-start gap-3">
+            <span className="bg-navy flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white">
+              2
+            </span>
+            <div>
+              <p className="text-navy text-sm font-semibold">
+                Empfehlungsblock weitergeben
+              </p>
+              <p className="text-text-muted text-xs">
+                Per E-Mail, Gmail, Zwischenablage oder PDF — an die Person, die
+                Tischlerarbeiten braucht.
+              </p>
+            </div>
+          </li>
+          <li className="flex items-start gap-3">
+            <span className="bg-navy flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white">
+              3
+            </span>
+            <div>
+              <p className="text-navy text-sm font-semibold">
+                Auftrag kommt zustande
+              </p>
+              <p className="text-text-muted text-xs">
+                Die Person schickt eine Anfrage an Seehafer Elemente und fugt
+                den Empfehlungsblock bei.
+              </p>
+            </div>
+          </li>
+          <li className="flex items-start gap-3">
+            <span className="bg-orange flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white">
+              4
+            </span>
+            <div>
+              <p className="text-orange text-sm font-semibold">
+                Provision erhalten
+              </p>
+              <p className="text-text-muted text-xs">
+                Wenn ein Auftrag daraus entsteht, bekommst du deine Provision
+                auf PayPal oder per Uberweisung.
+              </p>
+            </div>
+          </li>
+        </ol>
       </div>
     </section>
   );

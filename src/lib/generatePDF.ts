@@ -30,7 +30,7 @@ export async function generatePDF(data: ReferralData): Promise<void> {
   // Referral block
   doc.setFontSize(12);
   doc.setFont("helvetica", "bold");
-  doc.text("\u{1F4CC} Empfehlung", margin, y);
+  doc.text("Empfehlung", margin, y);
   y += 8;
   doc.setFontSize(10);
   doc.setFont("helvetica", "normal");
@@ -73,9 +73,9 @@ export async function generatePDF(data: ReferralData): Promise<void> {
   doc.text("Anleitung:", margin, y);
   y += 6;
   doc.setFont("helvetica", "normal");
-  doc.text("Kopiere den Block oben in deine", margin, y);
+  doc.text("Den Block oben kopieren und in die", margin, y);
   y += 5;
-  doc.text("Anfrage-Mail an info@seehafer-elemente.de", margin, y);
+  doc.text("Anfrage-Mail an info@seehafer-elemente.de einfuegen.", margin, y);
   y += 12;
 
   // Footer
